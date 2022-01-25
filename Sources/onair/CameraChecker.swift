@@ -5,6 +5,7 @@
 //  Created by wouter.de.bie on 11/21/19.
 //
 import AVFoundation
+import Foundation
 //import Logging
 
 //let logger = Logger(label: "nl.evenflow.onair.CameraChecker")
@@ -13,7 +14,6 @@ class CameraChecker: NSObject, USBWatcherDelegate, URLSessionDelegate {
     private var cameras: [Camera] = []
     private var onEvent: String
     private var offEvent: String
-    private var key: String
     private var localUrl: String?
     private var localCheckString: String?
     private var templateURL = "https://maker.ifttt.com/trigger/%@/with/key/%@"
@@ -23,11 +23,10 @@ class CameraChecker: NSObject, USBWatcherDelegate, URLSessionDelegate {
     private var ignoreCameras: [String] = []
     
     
-    init(onEvent: String, offEvent: String, key: String, localUrl: String?, localCheckString: String?, ignore: String?){
+    init(onEvent: String, offEvent: String, localUrl: String?, localCheckString: String?, ignore: String?){
         
         self.onEvent = onEvent
         self.offEvent = offEvent
-        self.key = key
         self.localUrl = localUrl
         self.localCheckString = localCheckString
         
@@ -89,22 +88,43 @@ class CameraChecker: NSObject, USBWatcherDelegate, URLSessionDelegate {
             let cameraString = cameras.filter{$0.isOn()}.map{$0.description}.joined(separator: ", ")
             message = "Camera(s) \(cameraString) are on"
             event = onEvent
+            
         } else {
             message = "All cameras off"
             event = offEvent
         }
         
-        let url = URL(string: String(format: templateURL, event, key))!
-        let session = URLSession.shared
-        let task = session.dataTask(with: url) {(data, response, error) in
-            if error == nil {
-                logger.info("IFTTT \(event) called successfully")
-            }
-        }
+//        let url = URL(string: String(format: templateURL, event))!
+//        let session = URLSession.shared
+//        let task = session.dataTask(with: url) {(data, response, error) in
+//            if error == nil {
+//                logger.info("IFTTT \(event) called successfully")
+//            }
+//        }
         
-        task.resume()
+        let _ = shell(event)
+        
+        //task.resume()
         createNotification(message: message)
         logger.info("Notification: \(message)")
+    }
+    
+    @discardableResult
+    func shell(_ command: String) -> (String?, Int32) {
+        let task = Process()
+
+        task.launchPath = "/bin/bash"
+        task.arguments = ["-c", command]
+
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = pipe
+        task.launch()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: data, encoding: .utf8)
+        task.waitUntilExit()
+        return (output, task.terminationStatus)
     }
     
     func createNotification(message: String) {

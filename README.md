@@ -1,3 +1,25 @@
+# Fork Notes
+
+Instead of calling IFTTT, this fork takes local scripts for its `--on` and `--off` arguments.
+
+**Example usage:**
+
+```bash
+onair --on "scripts/on.sh" --off "scripts/off.sh"`
+```
+
+**But why?**
+
+My camera is always on when I'm in WFH meetings, and this fork allows me drop a message into an [MQTT](https://hub.docker.com/_/eclipse-mosquitto) topic when a call starts. I have a [Home Assistant](https://www.home-assistant.io/) automation triggering off this topic that turns a nearby [Hue light](https://www.philips-hue.com/en-us/products/smart-light-bulbs) red. 
+
+This lets my family know I'm on a call.
+
+Eventually, I'll use one of my [IKEA Tradfri plugs](https://www.ikea.com/us/en/p/tradfri-wireless-control-outlet-30356169/) or an [esphome](https://esphome.io/) equipped [NodeMCU](https://www.amazon.com/HiLetgo-Internet-Development-Wireless-Micropython/dp/B081CSJV2V/ref=sr_1_3?keywords=nodemcu&qid=1643117694&sr=8-3) device to trigger something neat [like this](https://www.amazon.com/AIR-Red-Vintage-Light-Sign/dp/B09J3TYXW3/).
+
+**TODO**
+
+Test/fix these changes with the `launchd` configuration that the original author notes at the bottom of this readme.
+
 # Onair
 
 Command line utility that calls an [IFTTT](https://ifttt.com) webhook when any webcam turns on or off.
