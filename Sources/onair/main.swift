@@ -41,14 +41,11 @@ sigtermSrc.setEventHandler(handler: die)
 sigtermSrc.resume()
 
 struct OnAir : ParsableCommand {
-    @Option(help: ArgumentHelp("IFTTT Webhook event to call when a camera turns on", valueName: "event"))
+    @Option(help: ArgumentHelp("Script to call when a camera turns on, e.g. ./scripts/on.sh", valueName: "event"))
     var on: String
     
-    @Option(help: ArgumentHelp("IFTTT Webhook event to call when a camera turns off", valueName: "event"))
+    @Option(help: ArgumentHelp("Script to call when a camera turns off, e.g. ./scripts/off.sh", valueName: "event"))
     var off: String
-    
-    @Option(help: ArgumentHelp("IFTTT Webhook key", valueName: "key"))
-    var key: String
     
     @Option(help: ArgumentHelp("(optional) URL to call to see if local", valueName: "url"))
     var localUrl: String?
@@ -70,7 +67,7 @@ struct OnAir : ParsableCommand {
     }
 
     mutating func run() throws {
-        var childArgs = ["--on", on, "--off", off, "--key", key]
+        var childArgs = ["--on", on, "--off", off]
 
         if localUrl != nil && localString != nil {
             childArgs += ["--local-url", localUrl!, "--local-string", localString!]
@@ -86,7 +83,6 @@ struct OnAir : ParsableCommand {
         if environment["ONAIR_SPECIAL_VAR"] != nil {
             CameraChecker(onEvent: on,
                           offEvent: off,
-                          key: key,
                           localUrl: localUrl,
                           localCheckString: localString,
                           ignore: ignore).checkCameras()
